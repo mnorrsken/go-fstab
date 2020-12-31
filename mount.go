@@ -42,7 +42,7 @@ const (
 )
 
 // parseOptions parses the options field into an array of strings
-func parseOptions(optionsString string) (options map[string]string) {
+func ParseOptions(optionsString string) (options map[string]string) {
 	options = make(map[string]string)
 	for _, option := range strings.Split(optionsString, ",") {
 		bits := strings.Split(strings.TrimSpace(option), "=")
@@ -215,7 +215,7 @@ func ParseLine(line string) (mount *Mount, err error) {
 		mount.Spec = fields[0]
 		mount.File = fields[1]
 		mount.VfsType = fields[2]
-		mount.MntOps = parseOptions(fields[3])
+		mount.MntOps = ParseOptions(fields[3])
 		mount.Comment = comment
 
 		var convErr error
