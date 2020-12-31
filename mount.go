@@ -26,6 +26,9 @@ type Mount struct {
 
 	// Used by the fsck(8) program to determine the order in which filesystem checks are done at reboot time
 	PassNo int
+
+	// Not empty if is comment
+	Comment string
 }
 
 type DeviceIdentifierType int
@@ -77,8 +80,19 @@ func (mount *Mount) String() string {
 }
 
 // format serializes the object according to the given format
-func (mount *Mount) format(format string) string {
-	return fmt.Sprintf(format, mount.Spec, mount.File, mount.VfsType, mount.MntOpsString(), mount.Freq, mount.PassNo)
+func (mount *Mount) format(format string) (mountString string) {
+	if mount.Spec != "" {
+		mountString += fmt.Sprintf(format, mount.Spec, mount.File, mount.VfsType, mount.MntOpsString(), mount.Freq, mount.PassNo)
+	}
+	if mount.Comment != "" {
+		if mountString != "" {
+			mountString += " # "
+		} else {
+			mountString += "# "
+		}
+		mountString += mount.Comment
+	}
+	return
 }
 
 // PaddedString serializes the objet into fstab format with configurable column width.
@@ -176,12 +190,25 @@ func ParseLine(line string) (mount *Mount, err error) {
 	line = strings.TrimSpace(line)
 
 	// Lines starting with a pound sign (#) are comments, and are ignored. So are empty lines.
-	if ("" == line) || (line[0] == '#') {
-		return nil, nil
+	if "" == line {
+		mount = new(Mount)
+		return mount, nil
 	}
 
-	fields := strings.Fields(line)
-	if len(fields) < 4 {
+	var comment string
+
+	commentFields := strings.SplitN(line, "#", 2)
+
+	if len(commentFields) > 1 {
+		comment = commentFields[1]
+	}
+
+	fields := strings.Fields(commentFields[0])
+	if len(fields) == 0 {
+		mount = new(Mount)
+		mount.Comment = comment
+		return mount, nil
+	} else if len(fields) < 4 {
 		return nil, fmt.Errorf("too few fields (%d), at least 4 are expected", len(fields))
 	} else {
 		mount = new(Mount)
@@ -189,6 +216,7 @@ func ParseLine(line string) (mount *Mount, err error) {
 		mount.File = fields[1]
 		mount.VfsType = fields[2]
 		mount.MntOps = parseOptions(fields[3])
+		mount.Comment = comment
 
 		var convErr error
 

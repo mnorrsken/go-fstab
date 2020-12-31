@@ -15,6 +15,7 @@ var successfulParseLineExpectations map[string]Mount = map[string]Mount{
 		},
 		1,
 		2,
+		"",
 	},
 
 	"UUID=homer / ext4 rw,uid=0": Mount{
@@ -27,6 +28,7 @@ var successfulParseLineExpectations map[string]Mount = map[string]Mount{
 		},
 		0,
 		0,
+		"",
 	},
 }
 
@@ -40,6 +42,7 @@ var successfulMountStringExpectations map[string]Mount = map[string]Mount{
 		},
 		1,
 		2,
+		"",
 	},
 
 	"UUID=homer / ext4 uid=0 0 0": Mount{
@@ -51,6 +54,7 @@ var successfulMountStringExpectations map[string]Mount = map[string]Mount{
 		},
 		0,
 		0,
+		"",
 	},
 }
 
